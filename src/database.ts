@@ -78,9 +78,19 @@ export class Database {
         return this.makeRequest("POST", this.databaseUrl + "_replicate", {}, {source: source, target: target, continuous: continuous}, true);
     }
 
+    public filteredReplicate(source: string, target: string, continuous: boolean, channels: string): Promise<any> {
+        return this.makeRequest("POST", this.databaseUrl + "_replicate", {}, { source: source, target: target, continuous: continuous, filter: "sync_gateway/bychannel", query_params: { channels: channels } }, true);
+    }
+
     public sync(target: string, continuous: boolean): Promise<any> {
         return this.replicate(this.databaseName, target, continuous).then(result => {
             return this.replicate(target, this.databaseName, continuous);
+        });
+    }
+
+    public filteredSync(target: string, continuous: boolean, channels: string): Promise<any> {
+        return this.filteredReplicate(this.databaseName, target, continuous, channels).then(result => {
+            return this.filteredReplicate(target, this.databaseName, continuous, channels);
         });
     }
 
